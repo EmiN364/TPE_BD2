@@ -1,36 +1,99 @@
-import * as dotenv from 'dotenv';
-import { Schema, connect, model } from 'mongoose';
-dotenv.config()
+import * as dotenv from "dotenv";
+import { connect, model, Schema, Types } from "mongoose";
+dotenv.config();
 
-// 1. Create an interface representing a document in MongoDB.
-interface IUser {
-  name: string;
-  email: string;
-  avatar?: string;
+export interface ICliente {
+	nro_cliente: number;
+	nombre: string;
+	apellido: string;
+	direccion: string;
+	activo: number;
+	telefonos: ITelefono[];
 }
 
-// 2. Create a Schema corresponding to the document interface.
-const userSchema = new Schema<IUser>({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  avatar: String
+export interface ITelefono {
+	codigo_area: string;
+	nro_telefono: string;
+	tipo: string;
+}
+
+export interface IFactura {
+	nro_factura: number;
+	fecha: Date;
+	total_sin_iva: number;
+	iva: number;
+	total_con_iva: number;
+	nro_cliente: number;
+	idCliente?: Types.ObjectId;
+	detalle: IDetalle[];
+}
+
+export interface IDetalle {
+	nro_factura: number;
+	nro_item: number;
+	cantidad: number;
+	codigo_producto: number;
+	idProducto: Types.ObjectId;
+}
+
+export interface IProducto {
+	codigo_producto: number;
+	marca: string;
+	nombre?: string;
+	descripcion: string;
+	precio: number;
+	stock: number;
+}
+
+const telefonoSchema = new Schema<ITelefono>({
+	codigo_area: { type: String, required: true },
+	nro_telefono: { type: String, required: true },
+	tipo: { type: String, required: true, enum: ["C", "F"] },
 });
 
-// 3. Create a Model.
-const User = model<IUser>('User', userSchema);
+const clienteSchema = new Schema<ICliente>({
+	nro_cliente: { type: Number, required: true, unique: true },
+	nombre: { type: String, required: true },
+	apellido: { type: String, required: true },
+	direccion: { type: String, required: true },
+	activo: { type: Number, required: true },
+	telefonos: { type: [telefonoSchema], required: true },
+}).index({ nro_cliente: 1 }, { unique: true });
 
-// run().catch(err => console.log(err));
+const detalleSchema = new Schema<IDetalle>({
+	nro_item: { type: Number, required: true },
+	cantidad: { type: Number, required: true },
+	codigo_producto: { type: Number, required: true },
+	idProducto: { type: Schema.Types.ObjectId, ref: "Producto", required: true },
+});
 
-export async function run() {
-  // 4. Connect to MongoDB
-  await connect(process.env.MONGODB_URI as string);
+const facturaSchema = new Schema<IFactura>({
+	nro_factura: { type: Number, required: true, unique: true },
+	fecha: { type: Date, required: true },
+	total_sin_iva: { type: Number, required: true },
+	iva: { type: Number, required: true },
+	total_con_iva: { type: Number, required: true },
+	nro_cliente: { type: Number, required: true },
+	idCliente: { type: Schema.Types.ObjectId, ref: "Cliente", required: false },
+	detalle: { type: [detalleSchema], required: true },
+}).index({ nro_factura: 1 }, { unique: true });
 
-  const user = new User({
-    name: 'Bill',
-    email: 'bill@initech.com',
-    avatar: 'https://i.imgur.com/dM7Thhn.png'
-  });
-  await user.save();
+const productoSchema = new Schema<IProducto>({
+	codigo_producto: { type: Number, required: true, unique: true },
+	marca: { type: String, required: true },
+	nombre: { type: String, required: false },
+	descripcion: { type: String, required: true },
+	precio: { type: Number, required: true },
+	stock: { type: Number, required: true },
+}).index({ codigo_producto: 1 }, { unique: true });
 
-  console.log(user.email); // 'bill@initech.com'
+const Cliente = model<ICliente>("Cliente", clienteSchema);
+const Factura = model<IFactura>("Factura", facturaSchema);
+const Producto = model<IProducto>("Producto", productoSchema);
+
+async function connectMongo() {
+	await connect(process.env.MONGODB_URI as string);
 }
+
+export { Cliente, connectMongo, Factura, Producto };
+

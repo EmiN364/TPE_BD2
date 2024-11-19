@@ -27,7 +27,7 @@ console.log(`Server is running on http://localhost:${port}`)
 for (const route of Object.values(routes)) {
   app.openapi(route.route, async (c) => {
     startTime(c, 'db');
-    const response = await route.handler();
+    const response = await route.handler(c);
     endTime(c, 'db');
     return c.json(response);
   })

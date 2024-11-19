@@ -1,5 +1,7 @@
 import { createClient } from "redis";
 
+export const EXPIRATION_TIME = 60 * 60 * 1; // 24 hours
+
 const redisClient = createClient({
   url: process.env.REDIS_URL
 });
@@ -15,6 +17,7 @@ export async function getCachedData(key: string) {
   return cachedData ? JSON.parse(cachedData) : null;
 }
 
-export async function setCachedData(key: string, data: any) {
-  await redisClient.set(key, JSON.stringify(data));
+export async function setCachedData(key: string, data: any, expiration?: number) {
+  await redisClient.set(key, JSON.stringify(data), { EX: expiration });
 }
+

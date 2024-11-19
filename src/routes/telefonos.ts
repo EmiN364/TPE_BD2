@@ -3,7 +3,6 @@ import { z } from "zod";
 import { Cliente } from "../mongo.js";
 import { getCachedData, setCachedData } from "../redis.js";
 
-
 export const telefonos = {
   route: createRoute({
     method: 'get',
@@ -40,7 +39,7 @@ export const telefonos = {
     }
 
     const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
-    const result = [];
+    const result: { telefono: { codigo_area: string, nro_telefono: string, tipo: string }, cliente: { nro_cliente: number, nombre: string, apellido: string, direccion: string, activo: number } }[] = [];
 
     clientes.forEach(cliente => {
       cliente.telefonos.forEach(telefono => {

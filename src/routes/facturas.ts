@@ -1,66 +1,108 @@
 import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
+import { handle } from "hono/cloudflare-pages";
 import { z } from "zod";
 import { Cliente, Factura } from "../mongo.js";
 import { EXPIRATION_TIME, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema, iFacturaSchema } from "../zodModels.js";
 
 export const facturas = {
-    /**
-     * 7. Listar los datos de todas las facturas que hayan sido compradas por el cliente de nombre
-     * "Kai" y apellido "Bullock".
-     */
-    route: createRoute({
-        method: 'get',
-        path: '/facturas',
-        request: {
-            query: z.object({
-                nombre: z.string(),
-                apellido: z.string()
-            })
-        },
-        responses: {
-            200: {
-                content: {
-                    'application/json': {
-                        schema: z.array(iFacturaSchema),
-                    },
-                },
-                description: 'Retrieve the invoices',
-            },
-            404: {
-                description: 'Cliente not found',
-            },
-            500: {
-                description: 'Internal server error',
-            },
-        },
-    }),
+	/**
+	 * 7. Listar los datos de todas las facturas que hayan sido compradas por el cliente de nombre
+	 * "Kai" y apellido "Bullock".
+	 */
+	route: createRoute({
+		method: "get",
+		path: "/facturas",
+		request: {
+			query: z.object({
+				nombre: z.string(),
+				apellido: z.string(),
+			}),
+		},
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: z.array(iFacturaSchema),
+					},
+				},
+				description: "Retrieve the invoices",
+			},
+			404: {
+				description: "Cliente not found",
+			},
+			500: {
+				description: "Internal server error",
+			},
+		},
+	}),
 	handler: async (c: Context) => {
 		const { nombre, apellido } = c.req.query();
 
 		// check if cached
-        let cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
-        
-        if(!cliente){
-            console.log(`Cliente ${nombre} ${apellido} not found in cache`);
-            cliente = await Cliente.findOne({ nombre, apellido });
-            setCachedData(`cliente:${nombre}:${apellido}`, cliente?.nro_cliente, EXPIRATION_TIME);
-        }
-        else {
-            console.log(`Cliente ${nombre} ${apellido} found in cache! ${cliente}`);
-        }
+		let cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
 
-        if(!cliente) {
-            console.error(`Cliente ${nombre} ${apellido} not found`);
-            return null;
-        }
+		if (!cliente) {
+			console.log(`Cliente ${nombre} ${apellido} not found in cache`);
+			cliente = await Cliente.findOne({ nombre, apellido });
+			setCachedData(
+				`cliente:${nombre}:${apellido}`,
+				cliente?.nro_cliente,
+				EXPIRATION_TIME
+			);
+		} else {
+			console.log(`Cliente ${nombre} ${apellido} found in cache! ${cliente}`);
+		}
 
-        console.log(`Cliente ${nombre} ${apellido} found: ${cliente.nro_cliente}`);
+		if (!cliente) {
+			console.error(`Cliente ${nombre} ${apellido} not found`);
+			return null;
+		}
 
-        const facturas = await Factura.find({ nro_cliente: cliente.nro_cliente });
-        
-        return facturas;
-    }
+		console.log(`Cliente ${nombre} ${apellido} found: ${cliente.nro_cliente}`);
 
+		const facturas = await Factura.find({ nro_cliente: cliente.nro_cliente });
+
+		return facturas;
+	},
+};
+
+export const facturaPorMarca = {
+	route: createRoute({
+		method: "get",
+		path: "/factura",
+		request: {
+			query: z.object({
+				marca: z.string().default("Ipsum"),
+			}),
+		},
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: z.array(iFacturaSchema),
+					},
+				},
+				description: "Retrieve the invoices by brand",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const { marca } = c.req.query();
+		const facturas = await Factura.aggregate([
+			{
+				$lookup: {
+					from: "productos",
+					localField: "detalle.codigo_producto",
+					foreignField: "codigo_producto",
+					as: "productos_en_factura",
+				},
+			},
+			{
+				$match: { "productos_en_factura.marca": { $regex: marca, $options: "i" } },
+			},
+		]);
+		return facturas;
+	},
 };

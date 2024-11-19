@@ -44,24 +44,10 @@ export const clientes = {
 const inputSchema = z.object({
 	nombre: z
 		.string()
-		.default("Jacob")
-		.openapi({
-			param: {
-				name: "nombre",
-				in: "query",
-			},
-			example: "Jacob",
-		}),
+		.default("Jacob"),
 	apellido: z
 		.string()
 		.default("Cooper")
-		.openapi({
-			param: {
-				name: "apellido",
-				in: "query",
-			},
-			example: "Cooper",
-		}),
 });
 
 export const cliente = {

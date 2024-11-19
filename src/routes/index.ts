@@ -3,13 +3,15 @@ import { facturas } from "./facturas.js";
 import { telefonos } from "./telefonos.js";
 import { productosFacturados } from "./productosFacturados.js";
 import { clientesConFacturas } from "./clientesConFacturas.js";
+import { gastosClientes } from "./gastosClientes.js";
 
 
 export const routes = {
-  clientes,
-  facturas,
-  productosFacturados,
-  telefonos,
-  clientesConFacturas,
   cliente,
+  clientes,
+  clientesConFacturas,
+  facturas,
+  gastosClientes,
+  productosFacturados,
+  telefonos
 }

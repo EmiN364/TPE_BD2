@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import { connect, model, Schema, Types } from "mongoose";
+import { createViews } from "./views.js";
 dotenv.config();
 
 export interface ICliente {
@@ -93,6 +94,8 @@ const Producto = model<IProducto>("Producto", productoSchema);
 
 async function connectMongo() {
 	await connect(process.env.MONGODB_URI as string);
+	await createViews()
+
 }
 
 export { Cliente, connectMongo, Factura, Producto };

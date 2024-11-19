@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
-import { getCachedData, setCachedData } from "../redis.js";
+import { deleteCachedData, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema } from "../zodModels.js";
 
 const emptySchema = z.object({});
@@ -44,24 +44,10 @@ export const clientes = {
 const inputSchema = z.object({
 	nombre: z
 		.string()
-		.default("Jacob")
-		.openapi({
-			param: {
-				name: "nombre",
-				in: "query",
-			},
-			example: "Jacob",
-		}),
+		.default("Jacob"),
 	apellido: z
 		.string()
 		.default("Cooper")
-		.openapi({
-			param: {
-				name: "apellido",
-				in: "query",
-			},
-			example: "Cooper",
-		}),
 });
 
 export const cliente = {
@@ -102,3 +88,86 @@ export const cliente = {
 		return cliente;
 	},
 };
+
+export const createCliente = {
+	route: createRoute({
+		method: "post",
+		path: "/cliente",
+		request: { 
+			body: {
+				content: {
+					"application/json": {
+						schema: iClienteSchema,
+					},
+				}
+			}
+		 },
+		responses: {
+			200: {
+				description: "Create a new client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const cliente = await c.req.json();
+		const newCliente = await Cliente.create(cliente);
+		setCachedData(`cliente:${newCliente.nro_cliente}`, newCliente);
+		setCachedData(`cliente:${newCliente.nombre}:${newCliente.apellido}`, newCliente.nro_cliente);
+		return newCliente;
+	}
+}
+
+export const updateCliente = {
+	route: createRoute({
+		method: "put",
+		path: "/cliente/{nro_cliente}",
+		request: {
+			body: {
+				content: {
+					"application/json": {
+						schema: iClienteSchema.partial(),
+					},
+				}
+			},
+			params: z.object({
+				nro_cliente: z.coerce.number()
+			})
+		},
+		responses: {
+			200: {
+				description: "Update a client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const cliente = await c.req.json();
+		const { nro_cliente } = c.req.param();
+		const updatedCliente = await Cliente.findOneAndUpdate({ nro_cliente }, cliente, { new: true });
+		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
+		return updatedCliente;
+	}
+}
+
+export const deleteCliente = {
+	route: createRoute({
+		method: "delete",
+		path: "/cliente/{nro_cliente}",
+		request: {
+			params: z.object({
+				nro_cliente: z.coerce.number()
+			})
+		},
+		responses: {
+			200: {
+				description: "Delete a client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const { nro_cliente } = c.req.param();
+		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
+		await deleteCachedData(`cliente:${nro_cliente}`);
+		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		return deletedCliente;
+	}
+}

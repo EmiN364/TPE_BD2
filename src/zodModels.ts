@@ -12,7 +12,7 @@ export const iDetalleSchema = z.object({
   nro_item: z.number(),
   cantidad: z.number(),
   codigo_producto: z.number(),
-  idProducto: z.instanceof(Types.ObjectId)
+  idProducto: z.instanceof(Types.ObjectId).optional()
 })
 
 export const iProductoSchema = z.object({

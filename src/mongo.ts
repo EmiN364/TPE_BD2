@@ -33,7 +33,7 @@ export interface IDetalle {
 	nro_item: number;
 	cantidad: number;
 	codigo_producto: number;
-	idProducto: Types.ObjectId;
+	idProducto?: Types.ObjectId;
 }
 
 export interface IProducto {
@@ -64,7 +64,7 @@ const detalleSchema = new Schema<IDetalle>({
 	nro_item: { type: Number, required: true },
 	cantidad: { type: Number, required: true },
 	codigo_producto: { type: Number, required: true },
-	idProducto: { type: Schema.Types.ObjectId, ref: "Producto", required: true },
+	idProducto: { type: Schema.Types.ObjectId, ref: "Producto", required: false },
 });
 
 const facturaSchema = new Schema<IFactura>({

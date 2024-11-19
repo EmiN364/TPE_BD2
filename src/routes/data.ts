@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import { loadAllData } from "../loadData.js";
 import { Cliente, Factura, Producto } from "../mongo.js";
-import { deleteCachedData } from "../redis.js";
+import { flushAllCachedData } from "../redis.js";
 
 export const loadData = {
 	route: createRoute({
@@ -23,5 +23,5 @@ async function cleanAll() {
 	await Cliente.deleteMany({});
 	await Factura.deleteMany({});
 	await Producto.deleteMany({});
-	await deleteCachedData();
+	await flushAllCachedData();
 }

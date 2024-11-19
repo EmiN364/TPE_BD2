@@ -1,4 +1,4 @@
-import { cliente, clientes } from "./clientes.js";
+import { cliente, clientes, createCliente, deleteCliente, updateCliente } from "./clientes.js";
 import { clientesConFacturas } from "./clientesConFacturas.js";
 import { clientesYFacturas } from "./clientesYFacturas.js";
 import { loadData } from "./data.js";
@@ -18,4 +18,7 @@ export const routes = {
   telefonos,
   facturaPorMarca,
   loadData,
+  createCliente,
+  updateCliente,
+  deleteCliente,
 }

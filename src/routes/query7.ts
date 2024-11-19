@@ -5,20 +5,21 @@ import { getCachedData, setCachedData, EXPIRATION_TIME } from "../redis.js";
 import { iClienteSchema, iFacturaSchema } from "../zodModels.js";
 import type { Context } from "hono";
 
-export const facturas = {
+export const query7 = {
     /**
      * 7. Listar los datos de todas las facturas que hayan sido compradas por el cliente de nombre
      * "Kai" y apellido "Bullock".
      */
     route: createRoute({
         method: 'get',
-        path: '/facturas',
+        path: '/query7',
         request: {
             query: z.object({
                 nombre: z.string(),
                 apellido: z.string()
             })
         },
+        description: "Listar los datos de todas las facturas que hayan sido compradas por el cliente de nombre 'Kai' y apellido 'Bullock'",
         responses: {
             200: {
                 content: {

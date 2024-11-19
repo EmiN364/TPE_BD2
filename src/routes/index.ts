@@ -10,6 +10,7 @@ import { clientesSinFacturas } from "./clientesSinFacturas.js";
 import { facturaPorMarca, facturas } from "./facturas.js";
 import { telefonos } from "./telefonos.js";
 import { ProductosNoFacturados } from "../views.js";
+import { facturasOrdenadas } from "./facturasOrdenadas.js";
 
 export const routes = {
   cliente,
@@ -17,6 +18,7 @@ export const routes = {
   clientesConFacturas,
   clientesSinFacturas,
   facturas,
+  facturasOrdenadas,
   productosNoFacturados,
   clientesYFacturas,
   gastosClientes,
@@ -27,6 +29,6 @@ export const routes = {
   loadData,
   createCliente,
   updateCliente,
-  deleteCliente,
+  deleteCliente
 }
  

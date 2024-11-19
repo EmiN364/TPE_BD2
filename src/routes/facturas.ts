@@ -1,9 +1,9 @@
 import { createRoute } from "@hono/zod-openapi";
+import type { Context } from "hono";
 import { z } from "zod";
 import { Cliente, Factura } from "../mongo.js";
-import { getCachedData, setCachedData, EXPIRATION_TIME } from "../redis.js";
+import { EXPIRATION_TIME, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema, iFacturaSchema } from "../zodModels.js";
-import type { Context } from "hono";
 
 export const facturas = {
     /**
@@ -36,12 +36,10 @@ export const facturas = {
             },
         },
     }),
-    handler: async (c:Context) => {
-        // c is undifined
-        console.log(c);
-        const { nombre, apellido } = c.req.query();
+	handler: async (c: Context) => {
+		const { nombre, apellido } = c.req.query();
 
-        // check if cached
+		// check if cached
         let cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
         
         if(!cliente){
@@ -53,10 +51,9 @@ export const facturas = {
             console.log(`Cliente ${nombre} ${apellido} found in cache! ${cliente}`);
         }
 
-
-        if(!cliente){
+        if(!cliente) {
             console.error(`Cliente ${nombre} ${apellido} not found`);
-            return c.json([], 404);
+            return null;
         }
 
         console.log(`Cliente ${nombre} ${apellido} found: ${cliente.nro_cliente}`);

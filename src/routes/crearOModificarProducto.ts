@@ -59,10 +59,7 @@ export const crearOModificarProducto = {
         return c.json({ message: "Product could not be created or updated" }, { status: 400 });
       }
 
-      return c.json({
-        message: "Product successfully created or updated",
-        product: updatedProduct,
-      }, { status: 200 });
+      return updatedProduct;
     } catch (error) {
       console.error("Error upserting product:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

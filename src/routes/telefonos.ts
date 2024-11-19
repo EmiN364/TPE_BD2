@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
 import { getCachedData, setCachedData } from "../redis.js";
-import { iClienteSchema } from "../zodModels.js";
+
 
 export const telefonos = {
   route: createRoute({

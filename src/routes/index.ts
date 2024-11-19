@@ -1,11 +1,30 @@
-import { clientes } from "./clientes.js";
-import { query7 } from "./query7.js";
-import { query12 } from "./query12.js";
-import { query5 } from "./query5.js";
+import { cliente, clientes, createCliente, deleteCliente, updateCliente } from "./clientes.js";
+import { clientesConFacturas } from "./clientesConFacturas.js";
+import { clientesYFacturas } from "./clientesYFacturas.js";
+import { loadData } from "./data.js";
+import { gastosClientes } from "./gastosClientes.js";
+import { productosFacturados } from "./productosFacturados.js";
+import { productosNoFacturados } from "./productosNoFacturados.js";
+import { clientesSinFacturas } from "./clientesSinFacturas.js";
+import { facturaPorMarca, facturas } from "./facturas.js";
+import { telefonos } from "./telefonos.js";
+import { ProductosNoFacturados } from "../views.js";
+
 export const routes = {
+  cliente,
   clientes,
-  query5,
-  query12,
-  query7
+  clientesConFacturas,
+  clientesSinFacturas,
+  facturas,
+  productosNoFacturados,
+  clientesYFacturas,
+  gastosClientes,
+  productosFacturados,
+  telefonos,
+  facturaPorMarca,
+  loadData,
+  createCliente,
+  updateCliente,
+  deleteCliente,
 }
  

@@ -29,7 +29,7 @@ for (const route of Object.values(routes)) {
     startTime(c, 'db');
     const response = await route.handler(c);
     endTime(c, 'db');
-    return c.json(response);
+    return response ? c.json(response) : c.json({}, 404);
   })
 }
 

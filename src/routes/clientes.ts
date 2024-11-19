@@ -1,36 +1,173 @@
 import { createRoute } from "@hono/zod-openapi";
+import type { Context } from "hono";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
-import { getCachedData, setCachedData } from "../redis.js";
+import { deleteCachedData, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema } from "../zodModels.js";
 
+const emptySchema = z.object({});
+
 export const clientes = {
-  route: createRoute({
-    method: 'get',
-    path: '/clientes',
-    params: z.object({}),
-    responses: {
-      200: {
-        content: {
-          'application/json': {
-            schema: z.array(iClienteSchema),
-          },
-        },
-        description: 'Retrieve the clients',
-      },
-    },
-  }),
-  handler: async () => {
-    const cachedClientes = await getCachedData('clientes');
-    if (cachedClientes) {
-      return cachedClientes;
-    }
-    const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
-    setCachedData('clientes', clientes);
-    for (const cliente of clientes) {
-      setCachedData(`cliente:${cliente.nombre}:${cliente.apellido}`, cliente.nro_cliente);
-      setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
-    }
-    return clientes;
-  }
+	route: createRoute({
+		method: "get",
+		path: "/clientes",
+		params: emptySchema,
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: z.array(iClienteSchema),
+					},
+				},
+				description: "Retrieve the clients",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const cachedClientes = await getCachedData("clientes");
+		if (cachedClientes) {
+			return cachedClientes;
+		}
+		const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
+		setCachedData("clientes", clientes);
+		for (const cliente of clientes) {
+			setCachedData(
+				`cliente:${cliente.nombre}:${cliente.apellido}`,
+				cliente.nro_cliente
+			);
+			setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
+		}
+		return clientes;
+	},
+};
+
+const inputSchema = z.object({
+	nombre: z
+		.string()
+		.default("Jacob"),
+	apellido: z
+		.string()
+		.default("Cooper")
+});
+
+export const cliente = {
+	route: createRoute({
+		method: "get",
+		path: "/cliente",
+		request: { query: inputSchema },
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: iClienteSchema,
+					},
+				},
+				description: "Retrieve the client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const { nombre, apellido } = c.req.query();
+		const nro_cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
+		if (!nro_cliente) {
+			const cliente = await Cliente.findOne(
+				{ nombre, apellido },
+				{ _id: 0, __v: 0 }
+			).lean();
+
+			if (!cliente) {
+				console.error(`Cliente ${nombre} ${apellido} not found`);
+				return null;
+			}
+
+			setCachedData(`cliente:${nombre}:${apellido}`, cliente.nro_cliente);
+			setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
+			return cliente;
+		}
+		const cliente = await getCachedData(`cliente:${nro_cliente}`);
+		return cliente;
+	},
+};
+
+export const createCliente = {
+	route: createRoute({
+		method: "post",
+		path: "/cliente",
+		request: { 
+			body: {
+				content: {
+					"application/json": {
+						schema: iClienteSchema,
+					},
+				}
+			}
+		 },
+		responses: {
+			200: {
+				description: "Create a new client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const cliente = await c.req.json();
+		const newCliente = await Cliente.create(cliente);
+		setCachedData(`cliente:${newCliente.nro_cliente}`, newCliente);
+		setCachedData(`cliente:${newCliente.nombre}:${newCliente.apellido}`, newCliente.nro_cliente);
+		return newCliente;
+	}
+}
+
+export const updateCliente = {
+	route: createRoute({
+		method: "put",
+		path: "/cliente/{nro_cliente}",
+		request: {
+			body: {
+				content: {
+					"application/json": {
+						schema: iClienteSchema.partial(),
+					},
+				}
+			},
+			params: z.object({
+				nro_cliente: z.coerce.number()
+			})
+		},
+		responses: {
+			200: {
+				description: "Update a client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const cliente = await c.req.json();
+		const { nro_cliente } = c.req.param();
+		const updatedCliente = await Cliente.findOneAndUpdate({ nro_cliente }, cliente, { new: true });
+		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
+		return updatedCliente;
+	}
+}
+
+export const deleteCliente = {
+	route: createRoute({
+		method: "delete",
+		path: "/cliente/{nro_cliente}",
+		request: {
+			params: z.object({
+				nro_cliente: z.coerce.number()
+			})
+		},
+		responses: {
+			200: {
+				description: "Delete a client",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const { nro_cliente } = c.req.param();
+		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
+		await deleteCachedData(`cliente:${nro_cliente}`);
+		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		return deletedCliente;
+	}
 }

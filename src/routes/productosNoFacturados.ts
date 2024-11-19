@@ -12,10 +12,10 @@ import { ProductosNoFacturados } from "../views.js";
 
 // Create a model for the view
 
-export const query12 = {
+export const productosNoFacturados = {
     route: createRoute({
         method: 'get',
-        path: '/query12',
+        path: '/productos-no-facturados',
         description:"Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
         responses: {
             200: {

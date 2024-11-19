@@ -5,6 +5,7 @@ import { productosFacturados } from "./productosFacturados.js";
 import { clientesConFacturas } from "./clientesConFacturas.js";
 import { clientesYFacturas } from "./clientesYFacturas.js"
 import { gastosClientes } from "./gastosClientes.js";
+import { crearOModificarProducto } from "./crearOModificarProducto.js";
 
 
 export const routes = {
@@ -16,4 +17,5 @@ export const routes = {
   gastosClientes,
   productosFacturados,
   telefonos,
+  crearOModificarProducto
 }

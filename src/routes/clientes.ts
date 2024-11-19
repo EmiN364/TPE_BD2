@@ -29,14 +29,7 @@ export const clientes = {
 			return cachedClientes;
 		}
 		const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
-		setCachedData("clientes", clientes);
-		for (const cliente of clientes) {
-			setCachedData(
-				`cliente:${cliente.nombre}:${cliente.apellido}`,
-				cliente.nro_cliente
-			);
-			setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
-		}
+		setCachedData("clientes", clientes); // TODO: Revisar si vale la pena
 		return clientes;
 	},
 };

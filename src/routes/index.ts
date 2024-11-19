@@ -1,16 +1,16 @@
+import { ProductosNoFacturados } from "../views.js";
 import { cliente, clientes, createCliente, deleteCliente, updateCliente } from "./clientes.js";
 import { clientesConFacturas } from "./clientesConFacturas.js";
+import { clientesSinFacturas } from "./clientesSinFacturas.js";
 import { clientesYFacturas } from "./clientesYFacturas.js";
-import { loadData } from "./data.js";
-import { gastosClientes } from "./gastosClientes.js";
 import { crearOModificarProducto } from "./crearOModificarProducto.js";
+import { loadData } from "./data.js";
+import { facturaPorMarca, facturaPorMarca2, facturas } from "./facturas.js";
+import { facturasOrdenadas } from "./facturasOrdenadas.js";
+import { gastosClientes } from "./gastosClientes.js";
 import { productosFacturados } from "./productosFacturados.js";
 import { productosNoFacturados } from "./productosNoFacturados.js";
-import { clientesSinFacturas } from "./clientesSinFacturas.js";
-import { facturaPorMarca, facturas } from "./facturas.js";
 import { telefonos } from "./telefonos.js";
-import { ProductosNoFacturados } from "../views.js";
-import { facturasOrdenadas } from "./facturasOrdenadas.js";
 
 export const routes = {
   cliente,
@@ -26,6 +26,7 @@ export const routes = {
   telefonos,
   crearOModificarProducto,
   facturaPorMarca,
+  facturaPorMarca2,
   loadData,
   createCliente,
   updateCliente,

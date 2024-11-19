@@ -42,7 +42,7 @@ app.doc('/doc', {
   },
 })
 
-app.get('/ui', swaggerUI({ url: '/doc' }))
+app.get('/', swaggerUI({ url: '/doc' }))
 
 serve({
   fetch: app.fetch,

@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { handle } from "hono/cloudflare-pages";
 import { z } from "zod";
-import { Cliente, Factura } from "../mongo.js";
+import { Cliente, Factura, Producto } from "../mongo.js";
 import { EXPIRATION_TIME, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema, iFacturaSchema } from "../zodModels.js";
 
@@ -100,5 +100,34 @@ export const facturaPorMarca = {
 			},
 		]);
 		return facturas;
+	},
+};
+
+export const facturaPorMarca2 = {
+	route: createRoute({
+		method: "get",
+		path: "/factura2",
+		request: {
+			query: z.object({
+				marca: z.string().default("Ipsum"),
+			}),
+		},
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: z.array(iFacturaSchema),
+					},
+				},
+				description: "Retrieve the invoices by brand",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		const { marca } = c.req.query();
+		const marcas = (await Producto.find({ marca: { $regex: marca, $options: "i" } }, { codigo_producto: 1 }).distinct("codigo_producto"))
+		console.log(marcas);
+		const facturas = await Factura.find({ "detalle.codigo_producto": { $in: marcas } });
+		return facturas.length;
 	},
 };

@@ -128,6 +128,6 @@ export const facturaPorMarca2 = {
 		const marcas = (await Producto.find({ marca: { $regex: marca, $options: "i" } }, { codigo_producto: 1 }).distinct("codigo_producto"))
 		console.log(marcas);
 		const facturas = await Factura.find({ "detalle.codigo_producto": { $in: marcas } });
-		return facturas.length;
+		return facturas;
 	},
 };

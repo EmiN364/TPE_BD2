@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-export const EXPIRATION_TIME = 60 * 60 * 1; // 24 hours
+export const EXPIRATION_TIME = 60 * 60 * 24; // 24 hours
 
 const redisClient = createClient({
   url: process.env.REDIS_URL
@@ -27,4 +27,16 @@ export async function deleteCachedData(key: string) {
 
 export async function flushAllCachedData() {
   await redisClient.flushAll();
+}
+
+
+export async function deleteClientQueriesCachedData() {
+  await deleteCachedData(`clientes_sin_facturas`);
+  await deleteCachedData(`clientes_y_facturas`);
+}
+
+
+export async function deleteFacturaCachedData(nro_factura: string) {
+  await deleteCachedData(`factura:${nro_factura}`);
+
 }

@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
-import { deleteCachedData, getCachedData, setCachedData } from "../redis.js";
+import { deleteCachedData, deleteClientQueriesCachedData, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema } from "../zodModels.js";
 
 const emptySchema = z.object({});
@@ -108,6 +108,10 @@ export const createCliente = {
 			`cliente:${newCliente.nombre}:${newCliente.apellido}`,
 			newCliente.nro_cliente
 		);
+
+		deleteClientQueriesCachedData();
+
+
 		return newCliente;
 	},
 };
@@ -122,7 +126,7 @@ export const updateCliente = {
 			body: {
 				content: {
 					"application/json": {
-						schema: iClienteSchema.partial(),
+						schema: iClienteSchema.omit({ nro_cliente: true }).partial(),
 					},
 				},
 			},
@@ -145,6 +149,9 @@ export const updateCliente = {
 			{ new: true }
 		);
 		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
+		setCachedData(`cliente:${updatedCliente?.nombre}:${updatedCliente?.apellido}`, updatedCliente?.nro_cliente);
+
+		
 		return updatedCliente;
 	},
 };
@@ -170,9 +177,9 @@ export const deleteCliente = {
 		const { nro_cliente } = c.req.param();
 		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
 		await deleteCachedData(`cliente:${nro_cliente}`);
-		await deleteCachedData(
-			`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`
-		);
+		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
 		return deletedCliente;
 	},
 };
+
+

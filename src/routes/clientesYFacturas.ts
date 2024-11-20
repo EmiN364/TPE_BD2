@@ -13,7 +13,7 @@ export const clientesYFacturas = {
   route: createRoute({
     method: 'get',
     path: '/clientes-y-facturas',
-    summary: ". Devolver todos los clientes, con la cantidad de facturas que tienen registradas (si no tienen considerar cantidad en 0)",
+    summary: "Devolver todos los clientes, con la cantidad de facturas que tienen registradas (si no tienen considerar cantidad en 0)",
     tags: ["6. Devolver todos los clientes, con la cantidad de facturas que tienen registradas (si no tienen considerar cantidad en 0)"],
     params: z.object({}),
     responses: {

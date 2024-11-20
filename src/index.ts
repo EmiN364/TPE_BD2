@@ -36,8 +36,9 @@ app.doc('/doc', {
   openapi: '3.0.0',
   info: {
     version: '1.0.0',
-    title: 'My API',
-  },
+    title: 'API TPO - Grupo 2',
+    description: 'API para el trabajo práctico obligatorio de la materia Base de Datos 2',
+  }
 })
 
 app.get('/', swaggerUI({ url: '/doc' }))

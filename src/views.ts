@@ -1,18 +1,15 @@
 import { FacturasOrdenadas, ProductosNoFacturados } from "./mongo.js";
 
 export async function createViews() {
-    await createProductosNoFacturadosView();
-    await createFacturasOrdenadasView();
+    await Promise.all([
+        createProductosNoFacturadosView(),
+        createFacturasOrdenadasView(),
+    ]).catch(err => {
+        console.error("Error creating views", err);
+    });
 }
 
-async function createProductosNoFacturadosView() {
-    // try to drop it first
-    try {
-        await ProductosNoFacturados.collection.drop();
-    } catch (error) {
-        // Collection may not exist yet, ignore error
-    }
-    
+async function createProductosNoFacturadosView() {   
     await ProductosNoFacturados.createCollection({
         viewOn: 'productos',
         pipeline: [
@@ -47,18 +44,9 @@ async function createProductosNoFacturadosView() {
             }
         ]
     });
-
-
 }
 
 async function createFacturasOrdenadasView() {
-    // Intenta eliminar la colección si existe
-    try {
-        await FacturasOrdenadas.collection.drop();
-    } catch (error) {
-        // La colección puede no existir aún, ignora el error
-    }
-
     await FacturasOrdenadas.createCollection({
         viewOn: 'facturas',
         pipeline: [

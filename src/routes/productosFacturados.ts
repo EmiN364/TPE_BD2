@@ -9,7 +9,7 @@ export const productosFacturados = {
     method: 'get',
     path: '/productos-facturados',
     summary: ". Seleccionar los productos que han sido facturados al menos 1 vez.",
-    tags: ["8. Seleccionar los productos que han sido facturados al menos 1 vez."],
+    tags: ["Seleccionar los productos que han sido facturados al menos 1 vez."],
     responses: {
       200: {
         content: {

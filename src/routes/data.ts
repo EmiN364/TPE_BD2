@@ -19,6 +19,7 @@ export const loadData = {
 	handler: async () => {
 		await cleanAll();
 		await loadAllData();
+		return { message: "Data loaded successfully" };
 	},
 };
 

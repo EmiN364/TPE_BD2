@@ -9,7 +9,7 @@ export const facturasOrdenadas = {
     method: 'get',
     path: '/facturas-ordenadas',
     tags: ["11. Se necesita una vista que devuelva los datos de las facturas ordenadas por fecha."],
-    summary: "11. Se necesita una vista que devuelva los datos de las facturas ordenadas por fecha.",
+    summary: "Se necesita una vista que devuelva los datos de las facturas ordenadas por fecha.",
     params: z.object({}),
     responses: {
       200: {

@@ -34,9 +34,7 @@ export async function deleteClientQueriesCachedData() {
   deleteCachedData(`clientes_sin_facturas`);
   deleteCachedData(`clientes_con_facturas`);
   deleteCachedData(`clientes_y_facturas`);
-  // await deleteCachedData(`facturas_ordenadas`);
-  // await deleteCachedData(`productos_facturados`);
-  // await deleteCachedData(`facturas:nombre:apellido`);
+  deleteCachedData(`clientes`);
 }
 
 export async function deleteProductQueriesCachedData() {

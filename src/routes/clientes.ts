@@ -27,7 +27,13 @@ export const clientes = {
 		},
 	}),
 	handler: async (c: Context) => {
-		return await Cliente.find({}, { _id: 0, __v: 0 }).lean();
+		const cachedClientes = await getCachedData('clientes');
+		if (cachedClientes) {
+			return cachedClientes;
+		}
+		const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
+		setCachedData('clientes', clientes);
+		return clientes;
 	},
 };
 
@@ -76,6 +82,7 @@ export const cliente = {
 
 		setCachedData(`cliente:${nombre}:${apellido}`, cliente.nro_cliente);
 		setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
+		deleteClientQueriesCachedData();
 		return cliente;
 	},
 };
@@ -184,8 +191,9 @@ export const deleteCliente = {
 	handler: async (c: Context) => {
 		const { nro_cliente } = c.req.param();
 		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
-		await deleteCachedData(`cliente:${nro_cliente}`);
-		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		deleteCachedData(`cliente:${nro_cliente}`);
+		deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		deleteCachedData(`facturas:${nro_cliente}`);
 		deleteClientQueriesCachedData();
 		return deletedCliente;
 	},

@@ -12,36 +12,32 @@ import { iProductoSchema } from "../zodModels.js";
 // Create a model for the view
 
 export const productosNoFacturados = {
-    route: createRoute({
-        method: 'get',
-        path: '/productos-no-facturados',
-        summary: "Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
-        tags: ["12. Se necesita una vista que devuelva todos los productos que aún no han sido facturados."],
-        description:"Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
-        responses: {
-            200: {
-                content: {
-                    'application/json': {
-                        schema: z.array(iProductoSchema),
-                    },
-                },
-                description: 'Products that have not been invoiced',
-            },
-            500: {
-                description: 'Internal server error',
-            },
-        },
-    }),
-    handler: async (c: Context) => {
-        try {
-            // Use the view directly
-            const productos = await ProductosNoFacturados.find({});
-
-            return productos;
-        } catch (error) {
-            console.error('Error finding products without invoices:', error);
-            return c.json({ error: 'Internal server error' }, 500);
-        }
-    }
+	route: createRoute({
+		method: "get",
+		path: "/productos-no-facturados",
+		summary:
+			"Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
+		tags: [
+			"12. Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
+		],
+		description:
+			"Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
+		responses: {
+			200: {
+				content: {
+					"application/json": {
+						schema: z.array(iProductoSchema),
+					},
+				},
+				description: "Products that have not been invoiced",
+			},
+			500: {
+				description: "Internal server error",
+			},
+		},
+	}),
+	handler: async (c: Context) => {
+		// Use the view directly
+		return await ProductosNoFacturados.find({});
+	},
 };
-

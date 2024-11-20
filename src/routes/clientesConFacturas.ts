@@ -9,6 +9,8 @@ export const clientesConFacturas = {
     method: 'get',
     path: '/clientes-con-facturas',
     params: z.object({}),
+    tags: ["4. Obtener todos los clientes que tengan registrada al menos una factura."],
+    summary: ". Obtener todos los clientes que tengan registrada al menos una factura.",
     responses: {
       200: {
         content: {
@@ -31,8 +33,9 @@ export const clientesConFacturas = {
           from: 'facturas', 
           localField: 'nro_cliente',
           foreignField: 'nro_cliente',
-          as: 'facturas'
-        }
+          as: "facturas",
+          pipeline: [{ $limit: 1 }],
+        },
       },
       {
         $match: {

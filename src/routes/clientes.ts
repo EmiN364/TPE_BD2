@@ -11,6 +11,8 @@ export const clientes = {
 	route: createRoute({
 		method: "get",
 		path: "/clientes",
+		tags: ["1. Obtener los datos de los clientes junto con sus teléfonos."],
+		summary: ". Obtener los datos de los clientes junto con sus teléfonos.",
 		params: emptySchema,
 		responses: {
 			200: {
@@ -24,29 +26,24 @@ export const clientes = {
 		},
 	}),
 	handler: async (c: Context) => {
-		const cachedClientes = await getCachedData("clientes");
-		if (cachedClientes) {
-			return cachedClientes;
-		}
-		const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
-		setCachedData("clientes", clientes); // TODO: Revisar si vale la pena
-		return clientes;
+		return await Cliente.find({}, { _id: 0, __v: 0 }).lean();
 	},
 };
 
 const inputSchema = z.object({
-	nombre: z
-		.string()
-		.default("Jacob"),
-	apellido: z
-		.string()
-		.default("Cooper")
+	nombre: z.string().default("Jacob"),
+	apellido: z.string().default("Cooper"),
 });
 
 export const cliente = {
 	route: createRoute({
 		method: "get",
 		path: "/cliente",
+		tags: [
+			"2. Obtener el/los teléfono/s y el número de cliente del cliente con nombre “Jacob” y apellido “Cooper”.",
+		],
+		summary:
+			"2. Obtener el/los teléfono/s y el número de cliente del cliente con nombre “Jacob” y apellido “Cooper”.",
 		request: { query: inputSchema },
 		responses: {
 			200: {
@@ -62,22 +59,22 @@ export const cliente = {
 	handler: async (c: Context) => {
 		const { nombre, apellido } = c.req.query();
 		const nro_cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
-		if (!nro_cliente) {
-			const cliente = await Cliente.findOne(
-				{ nombre, apellido },
-				{ _id: 0, __v: 0 }
-			).lean();
-
-			if (!cliente) {
-				console.error(`Cliente ${nombre} ${apellido} not found`);
-				return null;
-			}
-
-			setCachedData(`cliente:${nombre}:${apellido}`, cliente.nro_cliente);
-			setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
-			return cliente;
+		if (nro_cliente) {
+			return await getCachedData(`cliente:${nro_cliente}`);
 		}
-		const cliente = await getCachedData(`cliente:${nro_cliente}`);
+
+		const cliente = await Cliente.findOne(
+			{ nombre, apellido },
+			{ _id: 0, __v: 0 }
+		).lean();
+
+		if (!cliente) {
+			console.error(`Cliente ${nombre} ${apellido} not found`);
+			return null;
+		}
+
+		setCachedData(`cliente:${nombre}:${apellido}`, cliente.nro_cliente);
+		setCachedData(`cliente:${cliente.nro_cliente}`, cliente);
 		return cliente;
 	},
 };
@@ -86,15 +83,17 @@ export const createCliente = {
 	route: createRoute({
 		method: "post",
 		path: "/cliente",
-		request: { 
+		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		summary: "Crear un nuevo cliente",
+		request: {
 			body: {
 				content: {
 					"application/json": {
 						schema: iClienteSchema,
 					},
-				}
-			}
-		 },
+				},
+			},
+		},
 		responses: {
 			200: {
 				description: "Create a new client",
@@ -105,26 +104,31 @@ export const createCliente = {
 		const cliente = await c.req.json();
 		const newCliente = await Cliente.create(cliente);
 		setCachedData(`cliente:${newCliente.nro_cliente}`, newCliente);
-		setCachedData(`cliente:${newCliente.nombre}:${newCliente.apellido}`, newCliente.nro_cliente);
+		setCachedData(
+			`cliente:${newCliente.nombre}:${newCliente.apellido}`,
+			newCliente.nro_cliente
+		);
 		return newCliente;
-	}
-}
+	},
+};
 
 export const updateCliente = {
 	route: createRoute({
 		method: "put",
 		path: "/cliente/{nro_cliente}",
+		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		summary: "Modificar un cliente existente",
 		request: {
 			body: {
 				content: {
 					"application/json": {
 						schema: iClienteSchema.partial(),
 					},
-				}
+				},
 			},
 			params: z.object({
-				nro_cliente: z.coerce.number()
-			})
+				nro_cliente: z.coerce.number(),
+			}),
 		},
 		responses: {
 			200: {
@@ -135,20 +139,26 @@ export const updateCliente = {
 	handler: async (c: Context) => {
 		const cliente = await c.req.json();
 		const { nro_cliente } = c.req.param();
-		const updatedCliente = await Cliente.findOneAndUpdate({ nro_cliente }, cliente, { new: true });
+		const updatedCliente = await Cliente.findOneAndUpdate(
+			{ nro_cliente },
+			cliente,
+			{ new: true }
+		);
 		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
 		return updatedCliente;
-	}
-}
+	},
+};
 
 export const deleteCliente = {
 	route: createRoute({
 		method: "delete",
 		path: "/cliente/{nro_cliente}",
+		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		summary: "Eliminar un cliente existente",
 		request: {
 			params: z.object({
-				nro_cliente: z.coerce.number()
-			})
+				nro_cliente: z.coerce.number(),
+			}),
 		},
 		responses: {
 			200: {
@@ -160,7 +170,9 @@ export const deleteCliente = {
 		const { nro_cliente } = c.req.param();
 		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
 		await deleteCachedData(`cliente:${nro_cliente}`);
-		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		await deleteCachedData(
+			`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`
+		);
 		return deletedCliente;
-	}
-}
+	},
+};

@@ -91,6 +91,8 @@ const productoSchema = new Schema<IProducto>({
 const Cliente = model<ICliente>("Cliente", clienteSchema);
 const Factura = model<IFactura>("Factura", facturaSchema);
 const Producto = model<IProducto>("Producto", productoSchema);
+const ProductosNoFacturados = model('productos_no_facturados', productoSchema);
+const FacturasOrdenadas = model('facturas_ordenadas', facturaSchema);
 
 async function connectMongo() {
 	await connect(process.env.MONGODB_URI as string);
@@ -98,5 +100,5 @@ async function connectMongo() {
 
 }
 
-export { Cliente, connectMongo, Factura, Producto };
+export { Cliente, connectMongo, Factura, FacturasOrdenadas, Producto, ProductosNoFacturados };
 

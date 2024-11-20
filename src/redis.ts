@@ -18,7 +18,7 @@ export async function getCachedData(key: string) {
 }
 
 export async function setCachedData(key: string, data: any, expiration?: number) {
-  await redisClient.set(key, JSON.stringify(data), { EX: expiration });
+  await redisClient.set(key, JSON.stringify(data), { EX: expiration || EXPIRATION_TIME });
 }
 
 export async function deleteCachedData(key: string) {

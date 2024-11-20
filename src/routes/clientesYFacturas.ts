@@ -13,6 +13,8 @@ export const clientesYFacturas = {
   route: createRoute({
     method: 'get',
     path: '/clientes-y-facturas',
+    summary: ". Devolver todos los clientes, con la cantidad de facturas que tienen registradas (si no tienen considerar cantidad en 0)",
+    tags: ["6. Devolver todos los clientes, con la cantidad de facturas que tienen registradas (si no tienen considerar cantidad en 0)"],
     params: z.object({}),
     responses: {
       200: {
@@ -27,9 +29,9 @@ export const clientesYFacturas = {
   }),
   handler: async () => {
     const cachedClientes = await getCachedData('clientes_y_facturas');
-    // if (cachedClientes) {
-    //   return cachedClientes;
-    // }
+    if (cachedClientes) {
+      return cachedClientes;
+    }
 
     const clientesYFacturas = await Cliente.aggregate([
       {
@@ -41,15 +43,18 @@ export const clientesYFacturas = {
         },
       },
       {
+        $addFields: {
+          cantidad_facturas: { $size: "$facturas" }
+        }
+      },
+      {
         $project: {
           _id: 0,
-          nombre: 1,
-          apellido: 1,
-          nro_cliente: 1,
-          cantidad_facturas: { $ifNull: [{ $size: "$facturas" }, 0] },
+          __v: 0,
+          facturas: 0
         },
       },
-    ]).exec();
+    ]);
 
     setCachedData('clientes_y_facturas', clientesYFacturas);
 

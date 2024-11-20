@@ -7,6 +7,8 @@ export const gastosClientes = {
   route: createRoute({
     method: 'get',
     path: '/gastos-clientes',
+    tags: ["10. Mostrar nombre y apellido de cada cliente junto con lo que gastó en total, con IVA incluido."],
+    summary: "0. Mostrar nombre y apellido de cada cliente junto con lo que gastó en total, con IVA incluido.",
     params: z.object({}),
     responses: {
       200: {
@@ -19,16 +21,11 @@ export const gastosClientes = {
             })),
           },
         },
-        description: 'Retrieve total spending of each client including VAT',
+        description: 'Retrieve total spending of each client including IVA',
       },
     },
   }),
   handler: async () => {
-    const cachedGastos = await getCachedData('gastos_clientes');
-    if (cachedGastos) {
-      return cachedGastos;
-    }
-
     const gastosClientes = await Cliente.aggregate([
       {
         $lookup: {
@@ -59,12 +56,10 @@ export const gastosClientes = {
           _id: 0,
           nombre: '$_id.nombre',
           apellido: '$_id.apellido',
-          totalGastado: 1
+          totalGastado: { $round: ['$totalGastado', 2] }
         }
       }
     ]);
-
-    setCachedData('gastos_clientes', gastosClientes);
     return gastosClientes;
   }
 };

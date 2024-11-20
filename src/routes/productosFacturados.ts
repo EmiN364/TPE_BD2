@@ -1,6 +1,6 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
-import { Cliente, Factura, Producto } from "../mongo.js";
+import { Factura } from "../mongo.js";
 import { getCachedData, setCachedData } from "../redis.js";
 import { iProductoSchema } from "../zodModels.js";
 
@@ -8,6 +8,8 @@ export const productosFacturados = {
   route: createRoute({
     method: 'get',
     path: '/productos-facturados',
+    summary: ". Seleccionar los productos que han sido facturados al menos 1 vez.",
+    tags: ["8. Seleccionar los productos que han sido facturados al menos 1 vez."],
     responses: {
       200: {
         content: {
@@ -20,22 +22,32 @@ export const productosFacturados = {
     },
   }),
   handler: async () => {
-    const cachedBilledProducts = await getCachedData('billedProducts');
-    if (cachedBilledProducts) {
-      return cachedBilledProducts;
+    const cachedProductos = await getCachedData('productos_facturados');
+    if (cachedProductos) {
+      return cachedProductos;
     }
-    // retrieve products that have been billed
-    const facturas = await Factura.find({}, { _id: 0, __v: 0 }).lean();
-    const productosFacturados = new Set();
-
-    facturas.forEach(factura => {
-      factura.detalle.forEach(detalle => {
-        productosFacturados.add(detalle.codigo_producto);
-      });
-    });
-
-    const productos = await Producto.find({ codigo_producto: { $in: Array.from(productosFacturados) } }, { _id: 0, __v: 0 }).lean();
-    setCachedData('billedProducts', productos);
+    const productos = await Factura.aggregate([
+      { $unwind: '$detalle' },
+      { $group: { _id: '$detalle.codigo_producto' } },
+      {
+        $lookup: {
+          from: 'productos',
+          localField: '_id',
+          foreignField: 'codigo_producto',
+          as: 'producto'
+        }
+      },
+      { $unwind: '$producto' },
+      { $replaceRoot: { newRoot: '$producto' } },
+      { $sort: { codigo_producto: 1 } },
+      {
+        $project: {
+          _id: 0,
+          __v: 0
+        }
+      }
+    ])
+    setCachedData('productos_facturados', productos);
     return productos;
   }
 };

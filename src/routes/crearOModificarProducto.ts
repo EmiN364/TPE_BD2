@@ -8,6 +8,9 @@ export const crearOModificarProducto = {
   route: createRoute({
     method: "put",
     path: "/productos/{codigo_producto}",
+    tags: ["14. Implementar la funcionalidad que permita crear nuevos productos y modificar los ya existentes. Tener en cuenta que el precio de un producto es sin IVA."],
+    summary: "Crear un nuevo producto o modificar uno existente",
+    description: "Crear un nuevo producto o modificar uno existente. Tener en cuenta que el precio de un producto es sin IVA.",
     request: {
       body: {
         content: {
@@ -45,7 +48,6 @@ export const crearOModificarProducto = {
     },
   }),
   handler: async (c: Context) => {
-    try {
       const productData = await c.req.json(); 
       const { codigo_producto } = c.req.param(); 
 
@@ -56,15 +58,10 @@ export const crearOModificarProducto = {
       );
 
       if (!updatedProduct) {
-        return c.json({ message: "Product could not be created or updated" }, { status: 400 });
+        return null;
       }
 
       return updatedProduct;
-    } catch (error) {
-      console.error("Error upserting product:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      return c.json({ message: "Failed to upsert product", error: errorMessage }, { status: 400 });
-    }
   },
 };
 

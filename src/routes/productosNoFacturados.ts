@@ -4,11 +4,10 @@
 
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod";
-import { model } from "mongoose";
 
-import { iProductoSchema } from "../zodModels.js";
 import type { Context } from "hono";
-import { ProductosNoFacturados } from "../views.js";
+import { ProductosNoFacturados } from "../mongo.js";
+import { iProductoSchema } from "../zodModels.js";
 
 // Create a model for the view
 
@@ -16,6 +15,8 @@ export const productosNoFacturados = {
     route: createRoute({
         method: 'get',
         path: '/productos-no-facturados',
+        summary: "Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
+        tags: ["12. Se necesita una vista que devuelva todos los productos que aún no han sido facturados."],
         description:"Se necesita una vista que devuelva todos los productos que aún no han sido facturados.",
         responses: {
             200: {

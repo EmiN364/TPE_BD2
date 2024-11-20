@@ -1,4 +1,3 @@
-import { ProductosNoFacturados } from "../views.js";
 import { cliente, clientes, createCliente, deleteCliente, updateCliente } from "./clientes.js";
 import { clientesConFacturas } from "./clientesConFacturas.js";
 import { clientesSinFacturas } from "./clientesSinFacturas.js";
@@ -13,23 +12,23 @@ import { productosNoFacturados } from "./productosNoFacturados.js";
 import { telefonos } from "./telefonos.js";
 
 export const routes = {
-  cliente,
+  loadData,
   clientes,
+  cliente,
+  telefonos,
   clientesConFacturas,
   clientesSinFacturas,
-  facturas,
-  facturasOrdenadas,
-  productosNoFacturados,
   clientesYFacturas,
-  gastosClientes,
+  facturas,
   productosFacturados,
-  telefonos,
-  crearOModificarProducto,
   facturaPorMarca,
   facturaPorMarca2,
-  loadData,
+  gastosClientes,
+  facturasOrdenadas,
+  productosNoFacturados,
   createCliente,
   updateCliente,
-  deleteCliente
+  deleteCliente,
+  crearOModificarProducto,
 }
  

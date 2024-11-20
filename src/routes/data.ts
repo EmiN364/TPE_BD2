@@ -7,6 +7,9 @@ export const loadData = {
 	route: createRoute({
 		method: "post",
 		path: "/load-data",
+		tags: ["0. Cargar datos iniciales"],
+		summary: "Eliminar y cargar datos iniciales",
+		description: "Eliminar y cargar datos iniciales",
 		responses: {
 			200: {
 				description: "Data loaded successfully",

@@ -1,21 +1,19 @@
-import { connect, model, Schema } from "mongoose";
+import { FacturasOrdenadas, ProductosNoFacturados } from "./mongo.js";
 
 export async function createViews() {
     await createProductosNoFacturadosView();
     await createFacturasOrdenadasView();
 }
 
-export async function createProductosNoFacturadosView() {
-    const db = await connect(process.env.MONGODB_URI as string);
-
+async function createProductosNoFacturadosView() {
     // try to drop it first
     try {
-        await db.connection.db?.dropCollection('productos_no_facturados');
+        await ProductosNoFacturados.collection.drop();
     } catch (error) {
         // Collection may not exist yet, ignore error
     }
     
-    await db.connection.db?.createCollection('productos_no_facturados', {
+    await ProductosNoFacturados.createCollection({
         viewOn: 'productos',
         pipeline: [
             {
@@ -53,17 +51,15 @@ export async function createProductosNoFacturadosView() {
 
 }
 
-export async function createFacturasOrdenadasView() {
-    const db = await connect(process.env.MONGODB_URI as string);
-
+async function createFacturasOrdenadasView() {
     // Intenta eliminar la colección si existe
     try {
-        await db.connection.db?.dropCollection('facturas_ordenadas');
+        await FacturasOrdenadas.collection.drop();
     } catch (error) {
         // La colección puede no existir aún, ignora el error
     }
 
-    await db.connection.db?.createCollection('facturas_ordenadas', {
+    await FacturasOrdenadas.createCollection({
         viewOn: 'facturas',
         pipeline: [
             {
@@ -72,29 +68,3 @@ export async function createFacturasOrdenadasView() {
         ]
     });
 }
-
-const productosNoFacturadosSchema = new Schema({
-    codigo_producto: { type: Number, required: true, unique:true },
-    marca: { type: String, required: true },
-    nombre: { type: String },
-    descripcion: { type: String, required: true },
-    precio: { type: Number, required: true },
-    stock: { type: Number, required: true }
-});
-export const ProductosNoFacturados = model('productos_no_facturados', productosNoFacturadosSchema);
-
-const facturaSchema = new Schema({
-    nro_factura: { type: Number, required: true },
-    fecha: { type: Date, required: true },
-    total_sin_iva: { type: Number, required: true },
-    iva: { type: Number, required: true },
-    total_con_iva: { type: Number, required: true },
-    nro_cliente: { type: Number, required: true },
-    idCliente: { type: Schema.Types.ObjectId, ref: "Cliente", required: false },
-    detalle: { type: Array, required: true },
-});
-
-export const FacturasOrdenadas = model('facturas_ordenadas', facturaSchema);
-
- // query the view and console the items:
-    // query the view and console the items: 

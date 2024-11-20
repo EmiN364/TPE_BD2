@@ -8,7 +8,7 @@ export const gastosClientes = {
     method: 'get',
     path: '/gastos-clientes',
     tags: ["10. Mostrar nombre y apellido de cada cliente junto con lo que gastó en total, con IVA incluido."],
-    summary: "0. Mostrar nombre y apellido de cada cliente junto con lo que gastó en total, con IVA incluido.",
+    summary: "Mostrar nombre y apellido de cada cliente junto con lo que gastó en total, con IVA incluido.",
     params: z.object({}),
     responses: {
       200: {

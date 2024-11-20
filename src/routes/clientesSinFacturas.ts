@@ -18,7 +18,7 @@ export const clientesSinFacturas = {
 			"5. Identificar todos los clientes que no tengan registrada ninguna factura.",
 		],
 		summary:
-			"5. Identificar todos los clientes que no tengan registrada ninguna factura.",
+			"Identificar todos los clientes que no tengan registrada ninguna factura.",
 		responses: {
 			200: {
 				content: {

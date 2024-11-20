@@ -13,7 +13,7 @@ export const clientes = {
 		method: "get",
 		path: "/clientes",
 		tags: ["1. Obtener los datos de los clientes junto con sus teléfonos."],
-		summary: ". Obtener los datos de los clientes junto con sus teléfonos.",
+		summary: "Obtener los datos de los clientes junto con sus teléfonos.",
 		params: emptySchema,
 		responses: {
 			200: {
@@ -44,7 +44,7 @@ export const cliente = {
 			"2. Obtener el/los teléfono/s y el número de cliente del cliente con nombre “Jacob” y apellido “Cooper”.",
 		],
 		summary:
-			"2. Obtener el/los teléfono/s y el número de cliente del cliente con nombre “Jacob” y apellido “Cooper”.",
+			"Obtener el/los teléfono/s y el número de cliente del cliente con nombre “Jacob” y apellido “Cooper”.",
 		request: { query: inputSchema },
 		responses: {
 			200: {

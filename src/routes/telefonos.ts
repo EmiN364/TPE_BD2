@@ -6,7 +6,7 @@ export const telefonos = {
   route: createRoute({
     method: 'get',
     path: '/telefonos',
-    summary: ". Mostrar cada teléfono junto con los datos del cliente.",
+    summary: "Mostrar cada teléfono junto con los datos del cliente.",
     tags: ["3. Mostrar cada teléfono junto con los datos del cliente."],
     params: z.object({}),
     responses: {

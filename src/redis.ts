@@ -31,14 +31,15 @@ export async function flushAllCachedData() {
 
 
 export async function deleteClientQueriesCachedData() {
-  await deleteCachedData(`clientes_sin_facturas`);
-  await deleteCachedData(`clientes_con_facturas`);
-  await deleteCachedData(`clientes_y_facturas`);
+  deleteCachedData(`clientes_sin_facturas`);
+  deleteCachedData(`clientes_con_facturas`);
+  deleteCachedData(`clientes_y_facturas`);
   // await deleteCachedData(`facturas_ordenadas`);
   // await deleteCachedData(`productos_facturados`);
   // await deleteCachedData(`facturas:nombre:apellido`);
 }
 
 export async function deleteProductQueriesCachedData() {
-  await deleteCachedData(`productos_facturados`);
+  deleteCachedData(`productos_facturados`);
+  deleteCachedData(`productos_no_facturados`);
 }

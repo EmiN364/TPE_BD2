@@ -186,6 +186,7 @@ export const deleteCliente = {
 		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
 		await deleteCachedData(`cliente:${nro_cliente}`);
 		await deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		deleteClientQueriesCachedData();
 		return deletedCliente;
 	},
 };

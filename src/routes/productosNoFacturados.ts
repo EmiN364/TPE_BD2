@@ -8,6 +8,8 @@ import { z } from "zod";
 import type { Context } from "hono";
 import { ProductosNoFacturados } from "../mongo.js";
 import { iProductoSchema } from "../zodModels.js";
+import { getCachedData } from "../redis.js";
+import { setCachedData } from "../redis.js";
 
 // Create a model for the view
 
@@ -38,6 +40,14 @@ export const productosNoFacturados = {
 	}),
 	handler: async (c: Context) => {
 		// Use the view directly
-		return await ProductosNoFacturados.find({});
+		// cache
+		const cachedProductos = await getCachedData("productos_no_facturados");
+		if (cachedProductos) {
+			return cachedProductos;
+		}
+
+		const productosNoFacturados = await ProductosNoFacturados.find({});
+		setCachedData("productos_no_facturados", productosNoFacturados);
+		return productosNoFacturados;
 	},
 };

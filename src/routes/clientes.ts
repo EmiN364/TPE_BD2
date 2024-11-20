@@ -1,5 +1,6 @@
 import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
+import { endTime, startTime } from "hono/timing";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
 import { deleteCachedData, deleteClientQueriesCachedData, getCachedData, setCachedData } from "../redis.js";
@@ -111,7 +112,6 @@ export const createCliente = {
 
 		deleteClientQueriesCachedData();
 
-
 		return newCliente;
 	},
 };
@@ -143,14 +143,22 @@ export const updateCliente = {
 	handler: async (c: Context) => {
 		const cliente = await c.req.json();
 		const { nro_cliente } = c.req.param();
-		const updatedCliente = await Cliente.findOneAndUpdate(
-			{ nro_cliente },
-			cliente,
-			{ new: true }
-		);
+		
+		const oldClient = await Cliente.findOne({nro_cliente}).lean()
+		if (!oldClient) {
+			return null
+		}
+		const updatedCliente = await Cliente.findByIdAndUpdate(oldClient._id, cliente, { new: true, lean: true })
+
+		if ((cliente.nombre && oldClient.nombre !== cliente.nombre) || (cliente.apellido && oldClient.apellido !== cliente.apellido)) {
+			await Promise.all([
+				deleteCachedData(`cliente:${oldClient.nombre}:${oldClient.apellido}`),
+				setCachedData(`cliente:${cliente.nombre ?? oldClient.nombre}:${cliente.apellido ?? oldClient.apellido}`, cliente.nro_cliente)
+			])
+		}
 		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
 		setCachedData(`cliente:${updatedCliente?.nombre}:${updatedCliente?.apellido}`, updatedCliente?.nro_cliente);
-
+		deleteClientQueriesCachedData()
 		
 		return updatedCliente;
 	},

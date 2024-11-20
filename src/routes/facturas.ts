@@ -46,24 +46,28 @@ export const facturas = {
 	}),
 	handler: async (c: Context) => {
 		const { nombre, apellido } = c.req.query();
-		// check if cached
-		let facturas = await getCachedData(`facturas:${nombre}:${apellido}`);
-		if (facturas) {
-			return facturas;
-		}
-
-		let nro_cliente = await getCachedData(`cliente:${nombre}:${apellido}`);
+		const clienteKey = `cliente:${nombre}:${apellido}`;
+		
+		let nro_cliente = await getCachedData(clienteKey);
+		
 		if (!nro_cliente) {
-			nro_cliente = (await Cliente.findOne({ nombre, apellido }))?.nro_cliente;
+			const cliente = await Cliente.findOne({ nombre, apellido });
+			if (!cliente) {
+				console.error(`Cliente ${nombre} ${apellido} not found`);
+				return null;
+			}
+			nro_cliente = cliente.nro_cliente;
+			await setCachedData(clienteKey, nro_cliente);
 		}
-
-		if (!nro_cliente) {
-			console.error(`Cliente ${nombre} ${apellido} not found`);
-			return null;
+	
+		const facturasKey = `facturas:${nro_cliente}`;
+		const cachedFacturas = await getCachedData(facturasKey);
+		if (cachedFacturas) {
+			return cachedFacturas;
 		}
-
-		facturas = await Factura.find({ nro_cliente });
-		setCachedData(`facturas:${nombre}:${apellido}`, facturas);
+	
+		const facturas = await Factura.find({ nro_cliente });
+		await setCachedData(facturasKey, facturas);
 		return facturas;
 	},
 };

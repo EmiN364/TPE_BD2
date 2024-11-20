@@ -32,11 +32,13 @@ export async function flushAllCachedData() {
 
 export async function deleteClientQueriesCachedData() {
   await deleteCachedData(`clientes_sin_facturas`);
+  await deleteCachedData(`clientes_con_facturas`);
   await deleteCachedData(`clientes_y_facturas`);
+  // await deleteCachedData(`facturas_ordenadas`);
+  // await deleteCachedData(`productos_facturados`);
+  // await deleteCachedData(`facturas:nombre:apellido`);
 }
 
-
-export async function deleteFacturaCachedData(nro_factura: string) {
-  await deleteCachedData(`factura:${nro_factura}`);
-
+export async function deleteProductQueriesCachedData() {
+  await deleteCachedData(`productos_facturados`);
 }

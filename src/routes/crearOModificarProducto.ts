@@ -2,6 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { z } from "zod";
 import { Producto } from "../mongo.js";
+import { deleteProductQueriesCachedData } from "../redis.js";
 import { iProductoSchema } from "../zodModels.js";
 
 export const crearOModificarProducto = {
@@ -15,7 +16,7 @@ export const crearOModificarProducto = {
       body: {
         content: {
           "application/json": {
-            schema: iProductoSchema.partial(), 
+            schema: iProductoSchema.omit({codigo_producto: true}).partial(), 
           },
         },
       },
@@ -60,6 +61,8 @@ export const crearOModificarProducto = {
       if (!updatedProduct) {
         return null;
       }
+
+      deleteProductQueriesCachedData()
 
       return updatedProduct;
   },

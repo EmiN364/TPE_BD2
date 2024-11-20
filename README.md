@@ -78,3 +78,9 @@ npm run dev
 ```
 
 
+
+## Aclaraciones
+
+- En el trabajo se evitó cachear queries que devuelven la base de datos completa, como las query 1 y 3, ya que estariamos sobrecargando el cache.
+
+- Al no tener métodos para facturar, no se implementó el borrado del cache de métodos relacionados exclusivamente con las facturas.

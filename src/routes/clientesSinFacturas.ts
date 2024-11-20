@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { z } from "zod";
 import { Cliente, Factura } from "../mongo.js";
-import { getCachedData, setCachedData } from "../redis.js";
+import { deleteCachedData, getCachedData, setCachedData } from "../redis.js";
 import { iClienteSchema } from "../zodModels.js";
 
 /**

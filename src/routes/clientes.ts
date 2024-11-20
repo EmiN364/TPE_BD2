@@ -1,9 +1,15 @@
 import { createRoute } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { endTime, startTime } from "hono/timing";
+import { MongooseError } from "mongoose";
 import { z } from "zod";
 import { Cliente } from "../mongo.js";
-import { deleteCachedData, deleteClientQueriesCachedData, getCachedData, setCachedData } from "../redis.js";
+import {
+	deleteCachedData,
+	deleteClientQueriesCachedData,
+	getCachedData,
+	setCachedData,
+} from "../redis.js";
 import { iClienteSchema } from "../zodModels.js";
 
 const emptySchema = z.object({});
@@ -27,12 +33,12 @@ export const clientes = {
 		},
 	}),
 	handler: async (c: Context) => {
-		const cachedClientes = await getCachedData('clientes');
+		const cachedClientes = await getCachedData("clientes");
 		if (cachedClientes) {
 			return cachedClientes;
 		}
 		const clientes = await Cliente.find({}, { _id: 0, __v: 0 }).lean();
-		setCachedData('clientes', clientes);
+		setCachedData("clientes", clientes);
 		return clientes;
 	},
 };
@@ -91,13 +97,18 @@ export const createCliente = {
 	route: createRoute({
 		method: "post",
 		path: "/cliente",
-		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		tags: [
+			"13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes.",
+		],
 		summary: "Crear un nuevo cliente",
 		request: {
 			body: {
 				content: {
 					"application/json": {
-						schema: iClienteSchema,
+						schema: iClienteSchema.partial({
+							nro_cliente: true,
+							telefonos: true,
+						}),
 					},
 				},
 			},
@@ -109,17 +120,32 @@ export const createCliente = {
 		},
 	}),
 	handler: async (c: Context) => {
-		const cliente = await c.req.json();
-		const newCliente = await Cliente.create(cliente);
-		setCachedData(`cliente:${newCliente.nro_cliente}`, newCliente);
-		setCachedData(
-			`cliente:${newCliente.nombre}:${newCliente.apellido}`,
-			newCliente.nro_cliente
-		);
+		try {
+			const cliente = await c.req.json();
 
-		deleteClientQueriesCachedData();
+			if (!cliente.nro_cliente) {
+				const lastCliente = await Cliente.findOne({})
+					.sort({ nro_cliente: -1 })
+					.lean();
+				cliente.nro_cliente = lastCliente ? lastCliente.nro_cliente + 1 : 101;
+			}
 
-		return newCliente;
+			const newCliente = await Cliente.create(cliente);
+			setCachedData(`cliente:${newCliente.nro_cliente}`, newCliente);
+			setCachedData(
+				`cliente:${newCliente.nombre}:${newCliente.apellido}`,
+				newCliente.nro_cliente
+			);
+
+			deleteClientQueriesCachedData();
+
+			return newCliente;
+		} catch (error) {
+			if (error instanceof MongooseError) {
+				console.error("Error al crear el cliente", error.message);
+			}
+			return { error: true, message: "El nro de cliente ya existe" };
+		}
 	},
 };
 
@@ -127,7 +153,9 @@ export const updateCliente = {
 	route: createRoute({
 		method: "put",
 		path: "/cliente/{nro_cliente}",
-		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		tags: [
+			"13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes.",
+		],
 		summary: "Modificar un cliente existente",
 		request: {
 			body: {
@@ -150,23 +178,38 @@ export const updateCliente = {
 	handler: async (c: Context) => {
 		const cliente = await c.req.json();
 		const { nro_cliente } = c.req.param();
-		
-		const oldClient = await Cliente.findOne({nro_cliente}).lean()
-		if (!oldClient) {
-			return null
-		}
-		const updatedCliente = await Cliente.findByIdAndUpdate(oldClient._id, cliente, { new: true, lean: true })
 
-		if ((cliente.nombre && oldClient.nombre !== cliente.nombre) || (cliente.apellido && oldClient.apellido !== cliente.apellido)) {
+		const oldClient = await Cliente.findOne({ nro_cliente }).lean();
+		if (!oldClient) {
+			return null;
+		}
+		const updatedCliente = await Cliente.findByIdAndUpdate(
+			oldClient._id,
+			cliente,
+			{ new: true, lean: true }
+		);
+
+		if (
+			(cliente.nombre && oldClient.nombre !== cliente.nombre) ||
+			(cliente.apellido && oldClient.apellido !== cliente.apellido)
+		) {
 			await Promise.all([
 				deleteCachedData(`cliente:${oldClient.nombre}:${oldClient.apellido}`),
-				setCachedData(`cliente:${cliente.nombre ?? oldClient.nombre}:${cliente.apellido ?? oldClient.apellido}`, cliente.nro_cliente)
-			])
+				setCachedData(
+					`cliente:${cliente.nombre ?? oldClient.nombre}:${
+						cliente.apellido ?? oldClient.apellido
+					}`,
+					cliente.nro_cliente
+				),
+			]);
 		}
 		setCachedData(`cliente:${nro_cliente}`, updatedCliente);
-		setCachedData(`cliente:${updatedCliente?.nombre}:${updatedCliente?.apellido}`, updatedCliente?.nro_cliente);
-		deleteClientQueriesCachedData()
-		
+		setCachedData(
+			`cliente:${updatedCliente?.nombre}:${updatedCliente?.apellido}`,
+			updatedCliente?.nro_cliente
+		);
+		deleteClientQueriesCachedData();
+
 		return updatedCliente;
 	},
 };
@@ -175,7 +218,9 @@ export const deleteCliente = {
 	route: createRoute({
 		method: "delete",
 		path: "/cliente/{nro_cliente}",
-		tags: ["13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes."],
+		tags: [
+			"13. Implementar la funcionalidad que permita crear nuevos clientes, eliminar y modificar los ya existentes.",
+		],
 		summary: "Eliminar un cliente existente",
 		request: {
 			params: z.object({
@@ -192,11 +237,11 @@ export const deleteCliente = {
 		const { nro_cliente } = c.req.param();
 		const deletedCliente = await Cliente.findOneAndDelete({ nro_cliente });
 		deleteCachedData(`cliente:${nro_cliente}`);
-		deleteCachedData(`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`);
+		deleteCachedData(
+			`cliente:${deletedCliente?.nombre}:${deletedCliente?.apellido}`
+		);
 		deleteCachedData(`facturas:${nro_cliente}`);
 		deleteClientQueriesCachedData();
 		return deletedCliente;
 	},
 };
-
-

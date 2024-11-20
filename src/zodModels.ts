@@ -3,7 +3,7 @@ import { z } from "zod"
 export const iTelefonoSchema = z.object({
   codigo_area: z.string(),
   nro_telefono: z.string(),
-  tipo: z.string()
+  tipo: z.enum(['C', 'F'])
 })
 
 export const iDetalleSchema = z.object({

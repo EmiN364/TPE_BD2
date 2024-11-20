@@ -1,7 +1,14 @@
 # TPO BD2 - Grupo 2
 
-## Descripción
+## Integrantes
 
+- **Candisano, Gonzalo** - 62.616
+- **Garcia Lauberer, Federico Inti** - 61.374
+- **Neme, Emilio Pablo** - 62.601
+- **Perez de Gracia, Mateo** - 63.401
+
+
+## Descripción
 
 Este proyecto es una API construida con TypeScript y Hono, diseñada para gestionar clientes, facturas y productos. Permite realizar operaciones CRUD sobre estos recursos y proporciona vistas para obtener información específica, como productos no facturados y facturas ordenadas, cumpliendo con los requerimientos del trabajo práctico.
 
@@ -30,6 +37,8 @@ Cuando se realizan modificaciones en los datos (crear/actualizar/eliminar), inva
 ### Aclaraciones
 
 - Al no tener métodos para facturar, no se implementó el borrado del cache de métodos relacionados exclusivamente con las facturas.
+
+- Para evidenciar las optimizaciones de rendimiento, en los response headers se puede ver el tiempo de respuesta de cada endpoint (server-timing).
 
 ## Tecnologías Utilizadas
 

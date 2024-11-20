@@ -2,7 +2,28 @@
 
 ## Descripción
 
+
 Este proyecto es una API RESTful construida con TypeScript y MongoDB, diseñada para gestionar clientes, facturas y productos. Permite realizar operaciones CRUD sobre estos recursos y proporciona vistas para obtener información específica, como productos no facturados y facturas ordenadas.
+
+Como parte del diseño, elegimos que nuestra persistencia políglota esté conformada por MongoDB y Redis.
+
+### MongoDB
+
+Cumple el rol principal de almacenar nuestros objetos en forma de BSON, fácilmente mapeables en el contexto de nuestra API en Node. Además, utilizamos las vistas de MongoDB para implementar consultas específicas como obtener productos no facturados y facturas ordenadas por fecha, aprovechando el pipeline de agregación que nos ofrece.
+
+### Redis
+
+Cumple un rol complementario como caché de consultas frecuentes, almacenando temporalmente los resultados de operaciones costosas para mejorar el rendimiento. Implementamos un sistema de caché con tiempo de expiración de 24 horas para datos como:
+
+- Búsquedas de clientes por nombre/apellido
+- Listados de facturas ordenadas
+- Productos no facturados
+- Productos facturados
+- Clientes y Facturas
+- Clientes sin Facturas
+- Clientes con Facturas
+
+Cuando se realizan modificaciones en los datos (crear/actualizar/eliminar), invalidamos las claves de caché relacionadas para mantener la consistencia.
 
 ## Tecnologías Utilizadas
 
@@ -41,7 +62,6 @@ Este proyecto es una API RESTful construida con TypeScript y MongoDB, diseñada 
 5. Abre tu navegador y visita `http://localhost:3000` para acceder a la API.
 
 ## Endpoints
-
 ### Clientes
 
 - **GET /clientes**: Obtiene la lista de todos los clientes.
@@ -57,14 +77,24 @@ Este proyecto es una API RESTful construida con TypeScript y MongoDB, diseñada 
 
 ### Productos
 
-- **GET /productos**: Obtiene la lista de todos los productos.
 - **GET /productos-no-facturados**: Obtiene productos que no han sido facturados.
+- **GET /productos-facturados**: Obtiene productos que no han sido facturados. 
 - **PUT /productos/{codigo_producto}**: Crea o actualiza un producto.
 
 ### Vistas
 
 - **GET /facturas-ordenadas**: Obtiene facturas ordenadas por fecha.
-- **GET /gastos-clientes**: Obtiene el total gastado por cada cliente.
+- **GET /clientes-sin-facturas**: Obtiene clientes que no tienen facturas.
+- **GET /clientes-con-facturas**: Obtiene clientes que tienen al menos una factura.
+- **GET /clientes-y-facturas**: Obtiene todos los clientes con sus facturas.
+
+### Otras
+
+- **GET /telefonos**: Obtiene información relacionada con teléfonos.
+- **GET /factura-por-marca**: Obtiene facturas filtradas por marca.
+- **GET /factura-por-marca2**: Obtiene facturas filtradas por marca (implementación alternativa).
+- **GET /gastos-clientes**: Obtiene información sobre los gastos de los clientes.
+- **POST /load-data**: Carga datos iniciales desde archivos CSV.
 
 ## Carga de Datos
 

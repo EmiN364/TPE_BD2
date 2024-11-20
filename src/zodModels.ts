@@ -1,4 +1,3 @@
-import { Types } from "mongoose"
 import { z } from "zod"
 
 export const iTelefonoSchema = z.object({
@@ -12,7 +11,6 @@ export const iDetalleSchema = z.object({
   nro_item: z.number(),
   cantidad: z.number(),
   codigo_producto: z.number(),
-  idProducto: z.instanceof(Types.ObjectId).optional()
 })
 
 export const iProductoSchema = z.object({
@@ -40,6 +38,5 @@ export const iFacturaSchema = z.object({
   iva: z.number(),
   total_con_iva: z.number(),
   nro_cliente: z.number(),
-  idCliente: z.instanceof(Types.ObjectId).optional(),
   detalle: z.array(iDetalleSchema)
 })

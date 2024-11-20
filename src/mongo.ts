@@ -25,7 +25,6 @@ export interface IFactura {
 	iva: number;
 	total_con_iva: number;
 	nro_cliente: number;
-	idCliente?: Types.ObjectId;
 	detalle: IDetalle[];
 }
 
@@ -34,7 +33,6 @@ export interface IDetalle {
 	nro_item: number;
 	cantidad: number;
 	codigo_producto: number;
-	idProducto?: Types.ObjectId;
 }
 
 export interface IProducto {
@@ -65,7 +63,6 @@ const detalleSchema = new Schema<IDetalle>({
 	nro_item: { type: Number, required: true },
 	cantidad: { type: Number, required: true },
 	codigo_producto: { type: Number, required: true },
-	idProducto: { type: Schema.Types.ObjectId, ref: "Producto", required: false },
 });
 
 const facturaSchema = new Schema<IFactura>({
@@ -75,7 +72,6 @@ const facturaSchema = new Schema<IFactura>({
 	iva: { type: Number, required: true },
 	total_con_iva: { type: Number, required: true },
 	nro_cliente: { type: Number, required: true },
-	idCliente: { type: Schema.Types.ObjectId, ref: "Cliente", required: false },
 	detalle: { type: [detalleSchema], required: true },
 }).index({ nro_factura: 1 }, { unique: true });
 

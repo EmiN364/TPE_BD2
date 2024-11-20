@@ -67,20 +67,7 @@ export async function loadProductos() {
 export async function loadFacturas() {
 	await loadData(
 		"src/datasets/e01_factura.csv",
-		async (facturas: IFactura[]) => {
-			const clientes = await Cliente.find();
-			await Promise.all(
-				facturas.map(async (factura) => {
-					const cliente = clientes.find(
-						(c) => c.nro_cliente == factura.nro_cliente
-					);
-					if (cliente) {
-						factura.idCliente = cliente._id;
-					}
-					return Factura.create(factura);
-				})
-			);
-		}
+		async (facturas: IFactura[]) => await Factura.insertMany(facturas)
 	);
 }
 
@@ -88,15 +75,8 @@ export async function loadDetalles() {
 	await loadData(
 		"src/datasets/e01_detalle_factura.csv",
 		async (detalles: IDetalle[]) => {
-			const productos = await Producto.find();
 			await Promise.all(
 				detalles.map(async (detalle) => {
-					const producto = productos.find(
-						(p) => p.codigo_producto == detalle.codigo_producto
-					);
-					if (producto) {
-						detalle.idProducto = producto._id;
-					}
 					return Factura.updateOne(
 						{ nro_factura: detalle.nro_factura },
 						{ $push: { detalle: detalle } }
